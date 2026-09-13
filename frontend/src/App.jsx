@@ -7,6 +7,7 @@ import { api } from './api';
 import { initTelegram, getTelegramUser } from './utils/telegram';
 import { storageService } from './services/storageService';
 import { getFallbackTopics } from './data/curriculumFallback';
+import { MathGenerators } from './services/mathGenerator';
 import { ThemeProvider } from './context/ThemeContext';
 
 function MainApp() {
@@ -65,9 +66,33 @@ function MainApp() {
     initialize();
   }, []);
 
-  // Infinite replayability: Any lesson can be started at any time without heart blockers
-  const handleSelectLesson = (lesson) => {
-    setActiveLesson(lesson);
+  // Procedural task generation on click: fresh unique coefficients each time
+  const handleSelectLesson = (lesson, topic) => {
+    let topicSlug = lesson?.topic_slug || topic?.slug;
+    if (!topicSlug && lesson?.topic_id) {
+      const parentTopic = topics.find((t) => Number(t.id) === Number(lesson.topic_id));
+      topicSlug = parentTopic?.slug;
+    }
+    if (!topicSlug) {
+      topicSlug = 'fsu';
+    }
+
+    const generatedQuestions = MathGenerators.generateBatch(topicSlug, 10).map((q, idx) => ({
+      ...q,
+      lesson_id: lesson.id,
+      order_index: idx + 1,
+      question_type: 'choice',
+    }));
+
+    const dynamicLesson = {
+      ...lesson,
+      topic_slug: topicSlug,
+      questions: generatedQuestions,
+      question_count: generatedQuestions.length,
+      sessionId: Date.now(),
+    };
+
+    setActiveLesson(dynamicLesson);
     setView('lesson');
   };
 
@@ -78,6 +103,22 @@ function MainApp() {
   };
 
   const handleRetryLesson = () => {
+    if (activeLesson) {
+      const topicSlug = activeLesson.topic_slug || 'fsu';
+      const freshQuestions = MathGenerators.generateBatch(topicSlug, 10).map((q, idx) => ({
+        ...q,
+        lesson_id: activeLesson.id,
+        order_index: idx + 1,
+        question_type: 'choice',
+      }));
+
+      setActiveLesson({
+        ...activeLesson,
+        questions: freshQuestions,
+        question_count: freshQuestions.length,
+        sessionId: Date.now(),
+      });
+    }
     setCompletionData(null);
     setView('lesson');
   };

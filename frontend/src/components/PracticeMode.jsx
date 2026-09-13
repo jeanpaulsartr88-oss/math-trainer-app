@@ -7,6 +7,7 @@ import { api } from '../api';
 import { storageService } from '../services/storageService';
 import { sound } from '../utils/sound';
 import { hapticSuccess, hapticError } from '../utils/telegram';
+import { MathGenerators } from '../services/mathGenerator';
 
 export default function PracticeMode({ user, mistakeIds = [], onExit, onHeartsUpdated }) {
   const [questions, setQuestions] = useState([]);
@@ -22,10 +23,28 @@ export default function PracticeMode({ user, mistakeIds = [], onExit, onHeartsUp
   const loadQuestions = async () => {
     setLoading(true);
     try {
-      const data = await api.getPracticeQuestions(mistakeIds);
-      setQuestions(data.questions || []);
+      if (mistakeIds && mistakeIds.length > 0) {
+        const data = await api.getPracticeQuestions(mistakeIds);
+        if (Array.isArray(data.questions) && data.questions.length > 0) {
+          setQuestions(data.questions);
+          return;
+        }
+      }
+      // Procedurally generate mixed practice batch across all topics
+      const topics = ['fsu', 'quadratic-equations', 'powers-and-roots', 'linear-equations-and-inequalities'];
+      const batch = [];
+      topics.forEach((t) => {
+        batch.push(...MathGenerators.generateBatch(t, 3));
+      });
+      setQuestions(batch.sort(() => Math.random() - 0.5).slice(0, 10));
     } catch (e) {
-      console.error('Failed to load practice questions', e);
+      console.error('Failed to load practice questions, generating dynamic batch:', e);
+      const topics = ['fsu', 'quadratic-equations', 'powers-and-roots', 'linear-equations-and-inequalities'];
+      const batch = [];
+      topics.forEach((t) => {
+        batch.push(...MathGenerators.generateBatch(t, 3));
+      });
+      setQuestions(batch.sort(() => Math.random() - 0.5).slice(0, 10));
     } finally {
       setLoading(false);
     }

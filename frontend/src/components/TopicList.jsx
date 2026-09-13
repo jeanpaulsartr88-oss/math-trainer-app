@@ -172,7 +172,7 @@ export default function TopicList({
                       return (
                         <button
                           key={lesson.id}
-                          onClick={() => onSelectLesson(lesson)}
+                          onClick={() => onSelectLesson({ ...lesson, topic_slug: topic.slug, topic_title: topic.title }, topic)}
                           className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group cursor-pointer"
                           title={isCompleted ? "Пройти повторно" : "Начать урок"}
                         >

@@ -6,7 +6,7 @@ import { api } from '../api';
 import { storageService } from '../services/storageService';
 import { sound } from '../utils/sound';
 import { hapticSuccess, hapticError, setupBackButton, hideBackButton } from '../utils/telegram';
-import { getFallbackLessonQuestions } from '../data/curriculumFallback';
+import { MathGenerators } from '../services/mathGenerator';
 
 export default function LessonScreen({
   lesson,
@@ -37,36 +37,34 @@ export default function LessonScreen({
     return () => hideBackButton();
   }, [onExit]);
 
-  // Load questions on mount with guaranteed fallback
+  // Initialize fresh procedural questions immediately on mount or retry
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await api.getLesson(lesson.id);
-        const qs = (res.questions && res.questions.length > 0)
-          ? res.questions
-          : getFallbackLessonQuestions(lesson.id);
-
-        setQuestions(qs);
-        setActiveQueue([...qs]);
-        setInitialCount(qs.length || 1);
-        if (qs.length > 0) {
-          setCurrentQuestion(qs[0]);
-        }
-      } catch (err) {
-        console.warn('Network error loading lesson, using local fallback:', err);
-        const qs = getFallbackLessonQuestions(lesson.id);
-        setQuestions(qs);
-        setActiveQueue([...qs]);
-        setInitialCount(qs.length || 1);
-        if (qs.length > 0) {
-          setCurrentQuestion(qs[0]);
-        }
-      } finally {
-        setLoading(false);
-      }
+    let qs = lesson?.questions;
+    if (!qs || qs.length === 0) {
+      const topicSlug = lesson?.topic_slug || 'fsu';
+      qs = MathGenerators.generateBatch(topicSlug, 10).map((q, idx) => ({
+        ...q,
+        lesson_id: lesson?.id,
+        order_index: idx + 1,
+        question_type: 'choice',
+      }));
     }
-    load();
-  }, [lesson.id]);
+
+    setQuestions(qs);
+    setActiveQueue([...qs]);
+    setInitialCount(qs.length || 1);
+    if (qs.length > 0) {
+      setCurrentQuestion(qs[0]);
+    }
+    setSelectedAnswer(null);
+    setAnswerChecked(false);
+    setIsCorrect(false);
+    setHearts(user?.hearts ?? 5);
+    setHeartsLost(0);
+    setFirstTryCorrect(new Set());
+    setFailedQuestionIds(new Set());
+    setLoading(false);
+  }, [lesson?.id, lesson?.sessionId]);
 
   const handleCheck = () => {
     if (selectedAnswer === null || selectedAnswer === undefined || answerChecked || !currentQuestion) return;
