@@ -7,30 +7,50 @@ import { hapticSelection } from '../utils/telegram';
 export default function QuestionCard({
   question,
   onAnswer,
-  isLocked,
+  isLocked = false,
+  disabled = false,
   selectedAnswer,
   setSelectedAnswer,
-  isCorrect,
-  answerChecked,
+  onSelectAnswer,
+  isCorrect = false,
+  answerChecked = false,
 }) {
   const [inputText, setInputText] = useState('');
 
   if (!question) return null;
 
+  const locked = Boolean(isLocked || disabled || answerChecked);
   const isChoice = question.question_type === 'choice' || !question.question_type;
   const isInput = question.question_type === 'input';
 
   const handleSelect = (opt) => {
-    if (isLocked) return;
+    if (locked) return;
     sound.playSelect();
     hapticSelection();
-    setSelectedAnswer(opt);
+    if (typeof onSelectAnswer === 'function') {
+      onSelectAnswer(opt);
+    }
+    if (typeof setSelectedAnswer === 'function') {
+      setSelectedAnswer(opt);
+    }
+    if (typeof onAnswer === 'function') {
+      onAnswer(opt);
+    }
   };
 
   const handleInputChange = (e) => {
-    if (isLocked) return;
-    setInputText(e.target.value);
-    setSelectedAnswer(e.target.value);
+    if (locked) return;
+    const val = e.target.value;
+    setInputText(val);
+    if (typeof onSelectAnswer === 'function') {
+      onSelectAnswer(val);
+    }
+    if (typeof setSelectedAnswer === 'function') {
+      setSelectedAnswer(val);
+    }
+    if (typeof onAnswer === 'function') {
+      onAnswer(val);
+    }
   };
 
   return (
@@ -54,8 +74,9 @@ export default function QuestionCard({
       {isChoice && (
         <div className="space-y-2.5 pt-1">
           {question.options?.map((opt, idx) => {
-            const isSelected = selectedAnswer === opt;
-            const isOptionCorrect = answerChecked && opt === question.correct_answer;
+            const isSelected = selectedAnswer !== null && selectedAnswer !== undefined &&
+              String(selectedAnswer).trim() === String(opt).trim();
+            const isOptionCorrect = answerChecked && String(opt).trim() === String(question.correct_answer).trim();
             const isOptionWrong = answerChecked && isSelected && !isCorrect;
 
             return (
@@ -63,10 +84,12 @@ export default function QuestionCard({
                 key={idx}
                 index={idx}
                 text={opt}
+                option={opt}
                 isSelected={isSelected}
                 isCorrect={isOptionCorrect}
                 isWrong={isOptionWrong}
-                isLocked={isLocked}
+                isLocked={locked}
+                onSelect={() => handleSelect(opt)}
                 onClick={() => handleSelect(opt)}
               />
             );
@@ -80,7 +103,7 @@ export default function QuestionCard({
             type="text"
             value={inputText}
             onChange={handleInputChange}
-            disabled={isLocked}
+            disabled={locked}
             placeholder="Введите число или выражение..."
             className="w-full text-center text-lg font-mono font-medium py-3.5 px-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
           />

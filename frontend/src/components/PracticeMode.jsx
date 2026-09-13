@@ -38,9 +38,9 @@ export default function PracticeMode({ user, mistakeIds = [], onExit, onHeartsUp
   const currentQuestion = questions[currentIndex];
 
   const handleCheckAnswer = async () => {
-    if (!selectedAnswer || isAnswerChecked || !currentQuestion) return;
+    if (selectedAnswer === null || selectedAnswer === undefined || isAnswerChecked || !currentQuestion) return;
 
-    const correct = selectedAnswer.trim() === currentQuestion.correct_answer.trim();
+    const correct = String(selectedAnswer).trim() === String(currentQuestion.correct_answer).trim();
     setIsCorrect(correct);
     setIsAnswerChecked(true);
 
@@ -160,8 +160,10 @@ export default function PracticeMode({ user, mistakeIds = [], onExit, onHeartsUp
         <QuestionCard
           question={currentQuestion}
           isLocked={isAnswerChecked}
+          disabled={isAnswerChecked}
           selectedAnswer={selectedAnswer}
           setSelectedAnswer={setSelectedAnswer}
+          onSelectAnswer={setSelectedAnswer}
           isCorrect={isCorrect}
           answerChecked={isAnswerChecked}
         />
@@ -170,10 +172,11 @@ export default function PracticeMode({ user, mistakeIds = [], onExit, onHeartsUp
       {!isAnswerChecked && (
         <footer className="sticky bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-20 max-w-md mx-auto w-full">
           <button
+            type="button"
             onClick={handleCheckAnswer}
-            disabled={!selectedAnswer}
+            disabled={selectedAnswer === null || selectedAnswer === undefined || isAnswerChecked}
             className={`w-full py-3.5 rounded-xl font-bold text-base transition-all ${
-              selectedAnswer
+              selectedAnswer !== null && selectedAnswer !== undefined && !isAnswerChecked
                 ? 'btn-academic-primary cursor-pointer'
                 : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
             }`}

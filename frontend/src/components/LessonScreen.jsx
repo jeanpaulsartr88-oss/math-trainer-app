@@ -69,9 +69,9 @@ export default function LessonScreen({
   }, [lesson.id]);
 
   const handleCheck = () => {
-    if (!selectedAnswer || answerChecked || !currentQuestion) return;
+    if (selectedAnswer === null || selectedAnswer === undefined || answerChecked || !currentQuestion) return;
 
-    const correct = selectedAnswer.trim() === currentQuestion.correct_answer.trim();
+    const correct = String(selectedAnswer).trim() === String(currentQuestion.correct_answer).trim();
     setIsCorrect(correct);
     setAnswerChecked(true);
 
@@ -180,12 +180,12 @@ export default function LessonScreen({
           <QuestionCard
             question={currentQuestion}
             selectedAnswer={selectedAnswer}
-            onSelectAnswer={(opt) => {
-              if (!answerChecked) {
-                setSelectedAnswer(opt);
-              }
-            }}
+            setSelectedAnswer={setSelectedAnswer}
+            onSelectAnswer={setSelectedAnswer}
+            isLocked={answerChecked}
             disabled={answerChecked}
+            answerChecked={answerChecked}
+            isCorrect={isCorrect}
           />
         )}
       </main>
@@ -194,10 +194,11 @@ export default function LessonScreen({
       {!answerChecked && (
         <footer className="sticky bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-20 max-w-md mx-auto w-full">
           <button
+            type="button"
             onClick={handleCheck}
-            disabled={!selectedAnswer}
+            disabled={selectedAnswer === null || selectedAnswer === undefined || answerChecked}
             className={`w-full py-3.5 rounded-xl font-bold text-base transition-all ${
-              selectedAnswer
+              selectedAnswer !== null && selectedAnswer !== undefined && !answerChecked
                 ? 'btn-academic-primary cursor-pointer'
                 : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
             }`}
