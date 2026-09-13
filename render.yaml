@@ -5,7 +5,7 @@ services:
     plan: free
     region: frankfurt
     buildCommand: ./build.sh
-    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT "backend.app:app"
+    startCommand: python -m backend.seed && gunicorn -w 2 -b 0.0.0.0:$PORT "backend.app:app"
     healthCheckPath: /healthz
     envVars:
       - key: PYTHON_VERSION

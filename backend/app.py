@@ -6,7 +6,7 @@ from .config import Config
 from .models import db, Topic, Lesson, Question
 from .seed import seed_database
 
-def create_app(config_class=Config):
+def create_app(config_class=Config, seed=False):
     static_folder = os.path.join(os.path.dirname(__file__), "static")
     app = Flask(__name__, static_folder=static_folder)
     app.config.from_object(config_class)
@@ -18,7 +18,9 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
-        seed_database()
+        # Seed on demand or during test suite runs; avoid multi-worker race conditions on Gunicorn import
+        if seed or app.config.get("TESTING"):
+            seed_database()
 
     # -------------------------------------------------------------
     # 1. Health check endpoint (for UptimeRobot & Render keep-alive)
@@ -137,8 +139,10 @@ def create_app(config_class=Config):
 
     return app
 
-app = create_app()
+app = create_app(seed=False)
 
 if __name__ == "__main__":
+    with app.app_context():
+        seed_database()
     port = int(os.getenv("PORT", 5001))
     app.run(host="0.0.0.0", port=port, debug=True)

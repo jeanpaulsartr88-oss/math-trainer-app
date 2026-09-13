@@ -2,20 +2,23 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "=== [1/4] Installing Python dependencies ==="
+echo "=== [1/5] Installing Python dependencies ==="
 pip install -r backend/requirements.txt
 
-echo "=== [2/4] Installing Frontend dependencies ==="
+echo "=== [2/5] Installing Frontend dependencies ==="
 cd frontend
 npm install
 
-echo "=== [3/4] Building Frontend bundle ==="
+echo "=== [3/5] Building Frontend bundle ==="
 npm run build
 cd ..
 
-echo "=== [4/4] Deploying static assets to Backend ==="
+echo "=== [4/5] Deploying static assets to Backend ==="
 mkdir -p backend/static
 rm -rf backend/static/*
 cp -r frontend/dist/* backend/static/
+
+echo "=== [5/5] Initializing Database Curriculum Seed ==="
+python -m backend.seed
 
 echo "=== Build completed successfully! ==="

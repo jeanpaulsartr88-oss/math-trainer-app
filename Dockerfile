@@ -39,4 +39,4 @@ EXPOSE 5001
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:5001/healthz || exit 1
 
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5001", "backend.app:app"]
+CMD ["sh", "-c", "python -m backend.seed && gunicorn -w 2 -b 0.0.0.0:5001 backend.app:app"]
