@@ -125,16 +125,23 @@ export default function LessonScreen({
       {/* Main scrollable question viewport */}
       <main className="flex-1 overflow-y-auto p-4 pb-28">
         {engine.currentQuestion && (
-          <QuestionCard
-            question={engine.currentQuestion}
-            selectedAnswer={engine.selectedAnswer}
-            setSelectedAnswer={engine.selectAnswer}
-            onSelectAnswer={engine.selectAnswer}
-            isLocked={engine.answerChecked}
-            disabled={engine.answerChecked}
-            answerChecked={engine.answerChecked}
-            isCorrect={engine.isCorrect}
-          />
+          <>
+            {engine.currentQuestion.isRetry && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-400 text-xs font-medium tracking-wide mb-3 animate-pulse">
+                <span>↺ {engine.currentQuestion.retryCount > 1 ? 'Повторная попытка: закрепление' : 'Второй шанс: работа над ошибкой'}</span>
+              </div>
+            )}
+            <QuestionCard
+              question={engine.currentQuestion}
+              selectedAnswer={engine.selectedAnswer}
+              setSelectedAnswer={engine.selectAnswer}
+              onSelectAnswer={engine.selectAnswer}
+              isLocked={engine.answerChecked}
+              disabled={engine.answerChecked}
+              answerChecked={engine.answerChecked}
+              isCorrect={engine.isCorrect}
+            />
+          </>
         )}
       </main>
 

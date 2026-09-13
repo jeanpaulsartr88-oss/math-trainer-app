@@ -3,8 +3,8 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 /**
  * useQuizEngine
  * Manages the quiz question queue with an interval re-insertion error loop:
- * When a student answers incorrectly, the question is marked with `isRetry: true`
- * and re-inserted 3-4 steps ahead in the queue (or at the end if fewer questions remain).
+ * When a student answers incorrectly, the question is marked with `isRetry: true`,
+ * `failedFirstTry: true`, and re-inserted 3-4 steps ahead in the queue (+3..4 steps).
  */
 export function useQuizEngine({
   questions = [],
@@ -18,7 +18,7 @@ export function useQuizEngine({
 
   const [initialCount, setInitialCount] = useState(() => Math.max(1, questions.length));
 
-  // Format questions with retry tracking flags
+  // Format initial questions with retry tracking flags
   const [queue, setQueue] = useState(() =>
     questions.map((q) => ({
       ...q,
@@ -36,7 +36,6 @@ export function useQuizEngine({
   const [heartPulsing, setHeartPulsing] = useState(false);
   const [firstTryCorrect, setFirstTryCorrect] = useState(new Set());
   const [failedQuestionIds, setFailedQuestionIds] = useState(new Set());
-  const [completedUniqueIds, setCompletedUniqueIds] = useState(new Set());
 
   // Current question is always head of the queue
   const currentQuestion = queue[0] || null;
@@ -59,7 +58,6 @@ export function useQuizEngine({
     setHeartPulsing(false);
     setFirstTryCorrect(new Set());
     setFailedQuestionIds(new Set());
-    setCompletedUniqueIds(new Set());
   }, []);
 
   const selectAnswer = useCallback((ans) => {
@@ -77,11 +75,10 @@ export function useQuizEngine({
     setAnswerChecked(true);
 
     if (correct) {
-      // If it wasn't a retry, record as first-try success
+      // Если failedFirstTry === false, увеличивается счетчик firstTryCorrect
       if (!currentQuestion.failedFirstTry && currentQuestion.retryCount === 0) {
         setFirstTryCorrect((prev) => new Set(prev).add(currentQuestion.id));
       }
-      setCompletedUniqueIds((prev) => new Set(prev).add(currentQuestion.id));
     } else {
       // Record mistake
       setFailedQuestionIds((prev) => new Set(prev).add(currentQuestion.id));
@@ -100,30 +97,34 @@ export function useQuizEngine({
     setAnswerChecked(false);
     setSelectedAnswer(null);
 
-    const remaining = queue.slice(1);
+    const newQueue = [...queue];
+    const current = newQueue.shift();
 
     if (!isCorrect) {
-      // Question was answered incorrectly -> Re-insert with 3-4 step delay
-      const updatedQuestion = {
-        ...currentQuestion,
-        isRetry: true,
-        retryCount: (currentQuestion.retryCount || 0) + 1,
-        failedFirstTry: true,
-      };
+      // Логика ошибки и интервальная вставка (+3..4 шага)
+      const failedItem = { ...current };
+      failedItem.failedFirstTry = true;
+      failedItem.isRetry = true;
+      failedItem.retryCount = (failedItem.retryCount || 0) + 1;
 
-      // Spaced repetition insertion: 3 steps delay (or at the end if fewer than 3 questions remain)
-      const delay = 3;
-      if (remaining.length <= delay) {
-        remaining.push(updatedQuestion);
+      // Смещение:
+      // Если queue.length >= 4: вставляем строго через 3 или 4 позиции:
+      // const offset = Math.floor(Math.random() * 2) + 3;
+      // queue.splice(offset, 0, failedItem);
+      // Если queue.length < 4: отправляем в конец: queue.push(failedItem);
+      // Если в очереди был только 1 вопрос: он остаётся единственным и показывается вновь.
+      if (newQueue.length >= 4) {
+        const offset = Math.floor(Math.random() * 2) + 3; // 3 or 4
+        newQueue.splice(offset, 0, failedItem);
       } else {
-        remaining.splice(delay, 0, updatedQuestion);
+        newQueue.push(failedItem);
       }
     }
 
-    setQueue(remaining);
+    setQueue(newQueue);
 
-    if (remaining.length === 0) {
-      // All questions in queue successfully resolved
+    if (newQueue.length === 0) {
+      // Урок продолжается до тех пор, пока массив queue не станет пустым
       const finalAccuracy = Math.round((firstTryCorrect.size / initialCount) * 100);
       if (typeof onCompleteRef.current === 'function') {
         onCompleteRef.current({
@@ -136,11 +137,10 @@ export function useQuizEngine({
     }
   }, [currentQuestion, queue, isCorrect, firstTryCorrect.size, initialCount, failedQuestionIds, heartsLost, hearts]);
 
-  // Monotonic progress percentage
+  // Прогресс-бар: считается только по первично решённым задачам
   const progressPercent = useMemo(() => {
-    const count = completedUniqueIds.size + (answerChecked && isCorrect && !completedUniqueIds.has(currentQuestion?.id) ? 1 : 0);
-    return Math.min(100, Math.round((count / initialCount) * 100));
-  }, [completedUniqueIds.size, answerChecked, isCorrect, currentQuestion?.id, initialCount]);
+    return Math.min(100, Math.round((firstTryCorrect.size / initialCount) * 100));
+  }, [firstTryCorrect.size, initialCount]);
 
   return {
     queue,
