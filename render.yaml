@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: math-lms-duolingo-tma
+    env: python
+    plan: free
+    region: frankfurt
+    buildCommand: ./build.sh
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT "backend.app:app"
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DEV_MODE
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BOT_TOKEN
+        sync: false

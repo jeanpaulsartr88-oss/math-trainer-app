@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #F8FAFC;
+  color: #0F172A;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Dark mode root styles */
+.dark body {
+  background-color: #090D16;
+  color: #F8FAFC;
+}
+
+/* KaTeX Dark Mode Math formulas */
+.dark .katex {
+  color: #F1F5F9 !important;
+}
+
+.dark .katex-display {
+  color: #F1F5F9 !important;
+}
+
+.katex-display {
+  margin: 0.6em 0 !important;
+}
+
+.katex {
+  font-size: 1.12em;
+}
+
+/* Minimalist Academic Button Styles */
+.btn-academic-primary {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  font-weight: 700;
+  border: 1px solid #1D4ED8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
+}
+.btn-academic-primary:hover:not(:disabled) {
+  background-color: #1D4ED8;
+}
+.btn-academic-primary:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.btn-academic-secondary {
+  background-color: #FFFFFF;
+  color: #334155;
+  font-weight: 600;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+}
+.dark .btn-academic-secondary {
+  background-color: #1E293B;
+  color: #E2E8F0;
+  border: 1px solid #334155;
+  box-shadow: none;
+}
+.btn-academic-secondary:hover:not(:disabled) {
+  border-color: #CBD5E1;
+}
+.dark .btn-academic-secondary:hover:not(:disabled) {
+  border-color: #475569;
+}
+.btn-academic-secondary:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+/* Option Button States */
+.option-default {
+  background-color: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  color: #1E293B;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+.dark .option-default {
+  background-color: #161F30;
+  border: 1.5px solid #283548;
+  color: #F1F5F9;
+  box-shadow: none;
+}
+.option-default:hover:not(:disabled) {
+  border-color: #94A3B8;
+}
+.dark .option-default:hover:not(:disabled) {
+  border-color: #475569;
+}
+
+.option-selected {
+  background-color: #EFF6FF;
+  border: 1.5px solid #3B82F6;
+  color: #1D4ED8;
+  box-shadow: 0 0 0 1px #3B82F6;
+}
+.dark .option-selected {
+  background-color: #172554;
+  border: 1.5px solid #60A5FA;
+  color: #93C5FD;
+  box-shadow: 0 0 0 1px #60A5FA;
+}
+
+.option-correct {
+  background-color: #ECFDF5;
+  border: 1.5px solid #10B981;
+  color: #047857;
+  box-shadow: 0 0 0 1px #10B981;
+}
+.dark .option-correct {
+  background-color: #064E3B;
+  border: 1.5px solid #34D399;
+  color: #A7F3D0;
+  box-shadow: 0 0 0 1px #34D399;
+}
+
+.option-wrong {
+  background-color: #FEF2F2;
+  border: 1.5px solid #EF4444;
+  color: #B91C1C;
+  box-shadow: 0 0 0 1px #EF4444;
+}
+.dark .option-wrong {
+  background-color: #7F1D1D;
+  border: 1.5px solid #F87171;
+  color: #FECACA;
+  box-shadow: 0 0 0 1px #F87171;
+}
+
+/* Animations */
+@keyframes heartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.animate-heart-pulse {
+  animation: heartPulse 0.35s ease-in-out;
+}

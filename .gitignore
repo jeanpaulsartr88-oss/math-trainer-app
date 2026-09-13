@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+math_app.db*
+
+# Node & Frontend
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+
+# Static compiled assets in backend
+backend/static/*
+!backend/static/.gitkeep
+
+# Environment variables
+.env
+.env.local
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
