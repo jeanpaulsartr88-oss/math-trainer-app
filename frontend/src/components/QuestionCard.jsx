@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import MathRenderer from './MathRenderer';
 import OptionButton from './OptionButton';
 import { sound } from '../utils/sound';
@@ -58,9 +59,17 @@ export default function QuestionCard({
       {/* Academic Problem Card */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors duration-200">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
-            Математическая задача
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
+              Математическая задача
+            </span>
+            {(question.isRetry || question.is_retry) && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/60 shadow-2xs animate-pulse">
+                <RotateCcw className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                <span>Второй шанс</span>
+              </span>
+            )}
+          </div>
           <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
             {isChoice ? 'Выбор ответа' : 'Точный ввод'}
           </span>
